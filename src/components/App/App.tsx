@@ -1,17 +1,16 @@
 import { useState } from 'react'
 import './App.module.css'
-
 import { Box, Button, CssBaseline, ThemeProvider, createTheme } from '@mui/material';
 import { MultiplierService } from '../../services/multiplierService';
 
 const theme = createTheme({
     palette: {
         background: {
-            default: "#000",
-            paper: ""
+            default: "#000"
         }
-    }
+    },
 });
+
 function App() {
     const [count, setCount] = useState(0)
 
@@ -29,8 +28,7 @@ function App() {
     return (
         <ThemeProvider theme={theme}>
             <CssBaseline />
-            <Box sx={{ class,backgroundColor: theme.palette.background.default }}
-                component={"main"}>
+            <Box component={"main"}>
                 <div>
                     <h1>
                         Hello
