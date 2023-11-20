@@ -8,7 +8,7 @@ export class MultiplierService {
     /**
      * The total number of cells in the game.
      */
-    private readonly totalCells;
+    private totalCells;
 
     /**
      * The number of mines in the game.
@@ -18,7 +18,7 @@ export class MultiplierService {
     /**
      * The number of diamonds in the game.
      */
-    private readonly diamonds : number;
+    private diamonds: number;
 
     /**
      * Represents the house edge.
@@ -31,6 +31,17 @@ export class MultiplierService {
      * @param mines The number of mines in the game.
      */
     constructor(totalCells: number, mines: number) {
+        this.totalCells = totalCells;
+        this.mines = mines;
+        this.diamonds = this.totalCells - this.mines;
+    }
+
+    /**
+     * Updates the data of the service.
+     * @param totalCells The new total number of cells in the game.
+     * @param mines The new number of mines in the game.
+     */
+    updateData(totalCells: number, mines: number) {
         this.totalCells = totalCells;
         this.mines = mines;
         this.diamonds = this.totalCells - this.mines;

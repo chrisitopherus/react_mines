@@ -2,3 +2,11 @@
     width: 100vw;
     height: 100vh;
 }
+
+.leftRounded {
+    border-radius: 1rem 0 0 1rem;
+}
+
+.rightRounded {
+    border-radius: 0 1rem 1rem 0;
+}
