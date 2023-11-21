@@ -1,5 +1,5 @@
 import { Box, Button, Container, FormControl, IconButton, InputAdornment, InputLabel, MenuItem, OutlinedInput, Select, Typography, useTheme } from "@mui/material";
-import { ChangeEventHandler } from "react";
+import { ChangeEventHandler, MouseEventHandler } from "react";
 import { SelectChangeHandler } from "../../types/eventHandlers";
 import { useAtom } from "jotai";
 import { soundMuteAtom } from "../../atoms/soundMute.atom";
@@ -27,6 +27,7 @@ interface GameSideBarProps {
     bet: {
         value: number;
         changeHandler: ChangeEventHandler<HTMLInputElement>;
+        placeBetHandler: MouseEventHandler<HTMLButtonElement>;
     }
 }
 
@@ -100,7 +101,7 @@ export default function GameSideBar({ gridSize, capital, mineAmount, bet }: Game
                         {generateMinesAmountItems(gridSize.currentGridSize ** 2 - 1)}
                     </Select>
                 </Box>
-                <Button variant="contained" color="secondary">Bet</Button>
+                <Button variant="contained" color="secondary" onClick={bet.placeBetHandler}>Bet</Button>
             </Box>
             <Box component={"section"}>
                 {gameStats.salesVolume}

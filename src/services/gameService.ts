@@ -22,6 +22,7 @@ export class GameService {
     foundDiamond() {
         if (this.foundDiamonds === this.totalDiamonds) throw new Error("Exceeded the maximum amount of possible diamonds.");
         this.foundDiamonds++;
+        console.log(this.foundDiamonds);
     }
 
     private get totalDiamonds() {

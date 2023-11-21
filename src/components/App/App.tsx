@@ -1,77 +1,33 @@
-import { ChangeEvent, useEffect, useState } from "react";
+import { ChangeEvent, useState } from "react";
 import './App.css'
 import { AppBar, Box, Grid, LinearProgress, SelectChangeEvent, Toolbar, Typography, useTheme } from '@mui/material';
-import { gridSizeAtom } from '../../atoms/gridSize.atom';
 import { useAtom } from 'jotai';
 import GameSideBar from '../Game-SideBar/Game-SideBar';
-import { capitalAtom } from '../../atoms/capital.atom';
-import { mineAmountAtom } from '../../atoms/mineAmount.atom';
-import { betAtom } from '../../atoms/bet.atom';
 import GameField from "../Game/GameField/GameField";
-import { FieldGenerationService } from '../../services/fieldGenerationService';
-import { currentMultiplierAtom } from "../../atoms/currentMultiplier.atom";
-import { gameStatsAtom } from "../../atoms/gameStats.atom";
 import { CellType } from "../../types/cell";
-import { GameService } from "../../services/gameService";
-import { gameOverAtom } from "../../atoms/gameOver.atom";
-import useSound from "../../hooks/useSound";
+import { useSound } from "../../hooks/useSound/useSound";
 import { soundMuteAtom } from "../../atoms/soundMute.atom";
-
-const fieldService = new FieldGenerationService();
-const gameService = new GameService(25, 1);
+import { useProgressTimer } from "../../hooks/useProgressTimer/useProgressTimer";
+import { useGameState } from "../../hooks/useGameState/useGameState";
 function App() {
     const theme = useTheme();
-    const [gridSize, setGridSize] = useAtom(gridSizeAtom);
-    const [captial, setCapital] = useAtom(capitalAtom);
-    const [mineAmount, setMineAmount] = useAtom(mineAmountAtom);
-    const [bet, setBet] = useAtom(betAtom);
-    const [currentMultiplier, setCurrentMultiplier] = useAtom(currentMultiplierAtom);
-    const [gameStats, setGameStats] = useAtom(gameStatsAtom);
-    const [gameOver, setGameOver] = useAtom(gameOverAtom);
     const [soundMute] = useAtom(soundMuteAtom);
-    const [isRoundActive, setIsRoundActive] = useState(true);
+    const [isRoundActive, setIsRoundActive] = useState(false);
+    const { progressTimer, progress } = useProgressTimer(isRoundActive, setIsRoundActive);
+    const {
+        gridSize, setGridSize,
+        capital, setCapital,
+        setMineAmount, validMineAmount,
+        bet, setBet,
+        currentMultiplier, setCurrentMultiplier,
+        gameStats, setGameStats,
+        gameOver, setGameOver,
+        cells, setCells,
+        gameService
+    } = useGameState();
 
     const [explosionSound] = useSound({ src: "/sounds/explosion.mp3" });
     const [gemSound] = useSound({ src: "/sounds/gem.mp3" });
-
-    // derived state for always having a valid mine count
-    const validMineAmount = Math.min(mineAmount, gridSize ** 2 - 1);
-    const [cells, setCells] = useState(() => fieldService.generateMineField(gridSize ** 2, validMineAmount));
-
-    const [progress, setProgress] = useState(0);
-
-    useEffect(() => {
-        let timer: number;
-
-        if (isRoundActive) {
-            timer = setInterval(() => {
-                setProgress((oldProgress) => {
-                    if (oldProgress >= 100) {
-                        clearInterval(timer);
-                        setGameOver(true);
-                        return 100; // Or reset to 0 based on your game logic
-                    }
-                    return oldProgress + 0.1;
-                });
-            }, 10);
-        }
-
-        return () => {
-            if (timer) clearInterval(timer);
-        };
-    }, [isRoundActive, setGameOver]);
-
-    useEffect(() => {
-        setCells(fieldService.generateMineField(gridSize ** 2, validMineAmount));
-    }, [gridSize, validMineAmount]);
-
-    useEffect(() => {
-        const maxMines = gridSize ** 2 - 1;
-        if (mineAmount > maxMines) {
-            setMineAmount(maxMines);
-        }
-
-    }, [gridSize, mineAmount, setMineAmount]);
 
     function gridSizeChangedHandler(event: SelectChangeEvent<number>) {
         setGridSize(+event.target.value);
@@ -91,6 +47,13 @@ function App() {
         setBet(input);
     }
 
+    function placeBetHandler() {
+        setIsRoundActive(true);
+        progressTimer.start();
+
+        console.log(cells);
+    }
+
     function cellClickHandler(event: React.MouseEvent) {
         const target = event.currentTarget as HTMLButtonElement;
         const tempIndex = target.dataset.index;
@@ -105,14 +68,14 @@ function App() {
             clickedCell.isRevealed = true;
             setGameOver(true);
             explosionSound.play(soundMute);
-            stopProgress();
+            progressTimer.stop();
         } else {
             // found diamond
             clickedCell.isRevealed = true;
             gameService.foundDiamond();
             setCurrentMultiplier(gameService.currentMultiplier);
             gemSound.play(soundMute);
-            resetProgress();
+            progressTimer.reset();
         }
 
         setCells(copyOfCells);
@@ -122,19 +85,6 @@ function App() {
 
     function gameEndHandler() {
         // 
-    }
-
-    function startProgress() {
-        setIsRoundActive(true);
-        setProgress(0);
-    }
-
-    function stopProgress() {
-        setIsRoundActive(false);
-    }
-
-    function resetProgress() {
-        setProgress(0);
     }
 
     function updateStats(value: number) {
@@ -172,14 +122,15 @@ function App() {
                         maxGridSize: 10,
                         changedHandler: gridSizeChangedHandler
                     }} capital={{
-                        value: captial,
+                        value: capital,
                         changeHandler: capitalChangeHandler
                     }} mineAmount={{
                         value: validMineAmount,
                         changedHandler: mineAmountChangedHandler
                     }} bet={{
                         value: bet,
-                        changeHandler: betChangeHandler
+                        changeHandler: betChangeHandler,
+                        placeBetHandler: placeBetHandler
                     }} />
                 </Grid>
                 {/* Game*/}
@@ -188,7 +139,8 @@ function App() {
                     <Box component={"header"} sx={{ width: "100%", padding: 2 }}>
                         <LinearProgress variant="determinate" color="secondary" value={progress} sx={{ height: "10px" }} />
                     </Box>
-                    <GameField cellClickHandler={cellClickHandler} gameEndHandler={gameEndHandler} gridSize={gridSize} cells={cells} />
+                    <Typography variant="h4">Current Multiplier: {currentMultiplier}</Typography>
+                    <GameField cellClickHandler={cellClickHandler} gameEndHandler={gameEndHandler} gridSize={gridSize} cells={cells} isActive={isRoundActive} />
                 </Grid>
             </Grid>
         </Grid>
