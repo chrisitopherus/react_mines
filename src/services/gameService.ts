@@ -11,6 +11,7 @@ export class GameService {
     }
 
     changeData(cells: number, minesAmount: number) {
+        this.diamondAmount = cells - minesAmount;
         this.multiplierService.updateData(cells, minesAmount);
     }
 

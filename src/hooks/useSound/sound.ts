@@ -2,11 +2,14 @@ import { HowlOptions } from "howler";
 import { SoundFactory } from "./soundFactory";
 
 export class Sound {
+    private sound: Howl | null = null;
     constructor(private options: HowlOptions) { }
 
     play(muted = false) {
-        if (muted) return;
-        const sound = SoundFactory.getSound(this.options);
-        sound.play();
+        if (this.sound === null) {
+            this.sound = SoundFactory.getSound(this.options);
+        }
+        this.sound.mute(muted);
+        this.sound.play();
     }
 }

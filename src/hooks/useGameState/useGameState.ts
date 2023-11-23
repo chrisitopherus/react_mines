@@ -12,6 +12,7 @@ import { GameService } from "../../services/gameService";
 import { FieldStateController } from "./FieldStateController";
 import { diamoundAmountAtom } from "../../atoms/diamondAmount.atom";
 import { CellInformation } from "../../types/cell";
+import { gameWonAtom } from "../../atoms/gameWon";
 
 export function useGameState() {
     const fieldService = useMemo(() => new FieldGenerationService(), []);
@@ -28,6 +29,7 @@ export function useGameState() {
     const [currentMultiplier, setCurrentMultiplier] = useAtom(currentMultiplierAtom);
     const [gameStats, setGameStats] = useAtom(gameStatsAtom);
     const [gameOver, setGameOver] = useAtom(gameOverAtom);
+    const [gameWon, setGameWon] = useAtom(gameWonAtom);
 
     // derived state for always having a valid mine count
     const validMineAmount = Math.min(mineAmount, gridSize ** 2 - 1);
@@ -36,6 +38,7 @@ export function useGameState() {
     useEffect(() => {
         const newCells = fieldService.generateMineField(gridSize ** 2, validMineAmount);
         setCells(newCells);
+        console.log(newCells);
     }, [gridSize, validMineAmount, fieldService, fieldState]);
 
     useEffect(() => {
@@ -55,7 +58,7 @@ export function useGameState() {
             const size = gridSize ** 2;
             gameServiceRef.current.changeData(size, validMineAmount);
         }
-    }, [gridSize, validMineAmount]);
+    }, [gridSize, validMineAmount, mineAmount]);
 
     // useEffect(() => {
     //     console.debug("cells changed", cells);
@@ -70,6 +73,7 @@ export function useGameState() {
         currentMultiplier, setCurrentMultiplier,
         gameStats, setGameStats,
         gameOver, setGameOver,
+        gameWon, setGameWon,
         cells, setCells,
         fieldController,
         gameService: gameServiceRef.current

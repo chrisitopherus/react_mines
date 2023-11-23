@@ -24,12 +24,14 @@ function App() {
         currentMultiplier, setCurrentMultiplier,
         gameStats, setGameStats,
         setGameOver,
+        setGameWon,
         cells, setCells,
         fieldController, gameService
     } = useGameState();
 
-    const [explosionSound, ] = useSound({ src: "/sounds/explosion.mp3" });
-    const [gemSound, ] = useSound({ src: "/sounds/gem.mp3" });
+    const [explosionSound,] = useSound({ src: "/sounds/explosion.mp3" });
+    const [gemSound,] = useSound({ src: "/sounds/gem.mp3" });
+    const [winSound,] = useSound({ src: "/sounds/win.wav" });
 
     function gridSizeChangedHandler(event: SelectChangeEvent<number>) {
         setGridSize(+event.target.value);
@@ -68,10 +70,20 @@ function App() {
     function handleDiamond(cell: CellInformation) {
         cell.isRevealed = true;
         gameService.foundDiamond();
-        setDiamondAmount(gameService.diamondsLeft);
+        const diamondsLeft = gameService.diamondsLeft;
+        setDiamondAmount(diamondsLeft);
         setCurrentMultiplier(gameService.currentMultiplier);
         gemSound.play(soundMute);
-        progressTimer.reset();
+        if (diamondsLeft === 0) {
+            setIsRoundActive(false);
+            setGameWon(true);
+            winSound.play(soundMute);
+            updateFinances({ won: true });
+            progressTimer.stop();
+            gameService.reset();
+        } else {
+            progressTimer.reset();
+        }
     }
 
     function handleMine(cell: CellInformation) {
@@ -85,7 +97,6 @@ function App() {
     }
 
     function updateFinances(result: { won: boolean }) {
-        console.log("Updating finances");
         let value: number;
         if (result.won) {
             value = bet * gameService.currentMultiplier - bet;

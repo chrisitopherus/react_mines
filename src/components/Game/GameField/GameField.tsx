@@ -5,8 +5,10 @@ import { MouseEventHandler } from "react";
 
 import Lottie from "lottie-react";
 import explosion from "../../../assets/animations/explosion.json";
+import confetti from "../../../assets/animations/confetti.json";
 import { gameOverAtom } from "../../../atoms/gameOver.atom";
 import { useAtom } from "jotai";
+import { gameWonAtom } from "../../../atoms/gameWon";
 
 function generateCells(gridSize: number, cells: CellInformation[], isActive: boolean, clickHandler: MouseEventHandler<HTMLButtonElement>) {
     const end = gridSize ** 2;
@@ -27,9 +29,14 @@ interface GameFieldProps {
 
 export default function GameField({ gridSize, cells, isActive, cellClickHandler }: GameFieldProps) {
     const [gameOver, setGameOver] = useAtom(gameOverAtom);
+    const [gameWon, setGameWon] = useAtom(gameWonAtom);
 
-    function handleAnimationComplete() {
+    function handleLoosingAnimationComplete() {
         setGameOver(false);
+    }
+
+    function handleWinningAnimationComplete() {
+        setGameWon(false);
     }
 
     return (
@@ -40,9 +47,18 @@ export default function GameField({ gridSize, cells, isActive, cellClickHandler 
                 <Backdrop component={"section"} open={gameOver} sx={{ display: "flex", flexDirection: "column", backgroundColor: "transparent" }}>
                     <Lottie
                         animationData={explosion}
-                        style={{ width: "75%", height: "75%" }}
+                        style={{ width: "100%", height: "100%" }}
                         loop={false}
-                        onComplete={handleAnimationComplete}
+                        onComplete={handleLoosingAnimationComplete}
+                    />
+                </Backdrop>}
+            {gameWon &&
+                <Backdrop component={"section"} open={gameWon} sx={{ display: "flex", flexDirection: "column", backgroundColor: "transparent" }}>
+                    <Lottie
+                        animationData={confetti}
+                        style={{ width: "100%", height: "100%" }}
+                        loop={false}
+                        onComplete={handleWinningAnimationComplete}
                     />
                 </Backdrop>}
         </Grid>
