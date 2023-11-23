@@ -28,8 +28,8 @@ function App() {
         fieldController, gameService
     } = useGameState();
 
-    const [explosionSound] = useSound({ src: "/sounds/explosion.mp3" });
-    const [gemSound] = useSound({ src: "/sounds/gem.mp3" });
+    const [explosionSound, ] = useSound({ src: "/sounds/explosion.mp3" });
+    const [gemSound, ] = useSound({ src: "/sounds/gem.mp3" });
 
     function gridSizeChangedHandler(event: SelectChangeEvent<number>) {
         setGridSize(+event.target.value);
@@ -82,10 +82,6 @@ function App() {
         progressTimer.stop();
         gameService.reset();
         setCurrentMultiplier(gameService.currentMultiplier);
-    }
-
-    function gameEndHandler() {
-        // 
     }
 
     function updateFinances(result: { won: boolean }) {
@@ -180,7 +176,7 @@ function App() {
                             {soundMute ? <VolumeOff /> : <VolumeUp />}
                         </IconButton>
                     </Box>
-                    <GameField cellClickHandler={cellClickHandler} gameEndHandler={gameEndHandler} gridSize={gridSize} cells={cells} isActive={isRoundActive} />
+                    <GameField cellClickHandler={cellClickHandler} gridSize={gridSize} cells={cells} isActive={isRoundActive} />
                 </Grid>
             </Grid>
         </Grid >

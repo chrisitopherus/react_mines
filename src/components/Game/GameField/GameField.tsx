@@ -1,4 +1,4 @@
-import { Backdrop, Button, Grid } from "@mui/material";
+import { Backdrop, Grid } from "@mui/material";
 import GameCell from "../GameCell/GameCell";
 import { CellInformation } from "../../../types/cell";
 import { MouseEventHandler } from "react";
@@ -23,24 +23,27 @@ interface GameFieldProps {
     cells: CellInformation[];
     isActive: boolean;
     cellClickHandler: MouseEventHandler<HTMLButtonElement>,
-    gameEndHandler: () => void;
 }
 
-export default function GameField({ gridSize, cells, isActive, cellClickHandler, gameEndHandler }: GameFieldProps) {
+export default function GameField({ gridSize, cells, isActive, cellClickHandler }: GameFieldProps) {
     const [gameOver, setGameOver] = useAtom(gameOverAtom);
 
-    function overlayExitClickHandler() {
+    function handleAnimationComplete() {
         setGameOver(false);
-        gameEndHandler();
     }
+
     return (
         <Grid container spacing={1} component={"section"}
             sx={{ width: "100%", height: "100%", maxWidth: "900px", minWidth: "500px", maxHeight: "500px", overflow: "auto", padding: 1 }}>
             {(cells.length !== gridSize ** 2) ? "" : generateCells(gridSize, cells, isActive, cellClickHandler)}
             {gameOver &&
-                <Backdrop component={"section"} open={gameOver} sx={{ display: "flex", flexDirection: "column" }}>
-                    <Lottie animationData={explosion} style={{ width: "75%", height: "75%" }} />
-                    <Button variant="contained" color="secondary" onClick={overlayExitClickHandler}>Exit</Button>
+                <Backdrop component={"section"} open={gameOver} sx={{ display: "flex", flexDirection: "column", backgroundColor: "transparent" }}>
+                    <Lottie
+                        animationData={explosion}
+                        style={{ width: "75%", height: "75%" }}
+                        loop={false}
+                        onComplete={handleAnimationComplete}
+                    />
                 </Backdrop>}
         </Grid>
     )
