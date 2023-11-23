@@ -1,29 +1,31 @@
-import { ChangeEvent, useState } from "react";
+import { useState } from "react";
 import './App.css'
-import { AppBar, Box, Grid, LinearProgress, SelectChangeEvent, Toolbar, Typography, useTheme } from '@mui/material';
+import { Box, Grid, IconButton, LinearProgress, SelectChangeEvent, Typography, useTheme } from '@mui/material';
 import { useAtom } from 'jotai';
 import GameSideBar from '../Game-SideBar/Game-SideBar';
 import GameField from "../Game/GameField/GameField";
-import { CellType } from "../../types/cell";
+import { CellInformation, CellType } from "../../types/cell";
 import { useSound } from "../../hooks/useSound/useSound";
 import { soundMuteAtom } from "../../atoms/soundMute.atom";
 import { useProgressTimer } from "../../hooks/useProgressTimer/useProgressTimer";
 import { useGameState } from "../../hooks/useGameState/useGameState";
+import { VolumeOff, VolumeUp } from "@mui/icons-material";
 function App() {
     const theme = useTheme();
-    const [soundMute] = useAtom(soundMuteAtom);
+    const [soundMute, setSoundMute] = useAtom(soundMuteAtom);
     const [isRoundActive, setIsRoundActive] = useState(false);
-    const { progressTimer, progress } = useProgressTimer(isRoundActive, setIsRoundActive);
+    const { progressTimer, progress } = useProgressTimer(isRoundActive, setIsRoundActive, progressTimerFinishedHandler, { seconds: 10, frequency: 100 });
     const {
         gridSize, setGridSize,
         capital, setCapital,
         setMineAmount, validMineAmount,
-        bet, setBet,
+        diamondAmount, setDiamondAmount,
+        bet,
         currentMultiplier, setCurrentMultiplier,
         gameStats, setGameStats,
-        gameOver, setGameOver,
+        setGameOver,
         cells, setCells,
-        gameService
+        fieldController, gameService
     } = useGameState();
 
     const [explosionSound] = useSound({ src: "/sounds/explosion.mp3" });
@@ -33,25 +35,15 @@ function App() {
         setGridSize(+event.target.value);
     }
 
-    function capitalChangeHandler(event: ChangeEvent) {
-        const input = +(event.target as HTMLInputElement).value;
-        setCapital(input);
-    }
-
     function mineAmountChangedHandler(event: SelectChangeEvent<number>) {
         setMineAmount(+event.target.value);
     }
 
-    function betChangeHandler(event: ChangeEvent) {
-        const input = +(event.target as HTMLInputElement).value;
-        setBet(input);
-    }
-
     function placeBetHandler() {
+        setCurrentMultiplier(gameService.currentMultiplier);
         setIsRoundActive(true);
         progressTimer.start();
-
-        console.log(cells);
+        fieldController.triggerNewFieldGeneration();
     }
 
     function cellClickHandler(event: React.MouseEvent) {
@@ -64,30 +56,65 @@ function App() {
         const clickedCell = copyOfCells[index];
         if (clickedCell.isRevealed) return;
         if (clickedCell.type === CellType.Mine) {
-            // end game
-            clickedCell.isRevealed = true;
-            setGameOver(true);
-            explosionSound.play(soundMute);
-            progressTimer.stop();
+            handleMine(clickedCell);
         } else {
-            // found diamond
-            clickedCell.isRevealed = true;
-            gameService.foundDiamond();
-            setCurrentMultiplier(gameService.currentMultiplier);
-            gemSound.play(soundMute);
-            progressTimer.reset();
+            handleDiamond(clickedCell);
         }
 
         setCells(copyOfCells);
-
         // at this point the currentMultiplier is not the updated value
+    }
+
+    function handleDiamond(cell: CellInformation) {
+        cell.isRevealed = true;
+        gameService.foundDiamond();
+        setDiamondAmount(gameService.diamondsLeft);
+        setCurrentMultiplier(gameService.currentMultiplier);
+        gemSound.play(soundMute);
+        progressTimer.reset();
+    }
+
+    function handleMine(cell: CellInformation) {
+        cell.isRevealed = true;
+        setGameOver(true);
+        explosionSound.play(soundMute);
+        updateFinances({ won: false });
+        progressTimer.stop();
+        gameService.reset();
+        setCurrentMultiplier(gameService.currentMultiplier);
     }
 
     function gameEndHandler() {
         // 
     }
 
+    function updateFinances(result: { won: boolean }) {
+        console.log("Updating finances");
+        let value: number;
+        if (result.won) {
+            value = bet * gameService.currentMultiplier - bet;
+        } else {
+            value = -bet;
+        }
+
+        updateStats(value);
+        setCapital((prev) => prev + value);
+    }
+
+    function cashOutHandler() {
+        progressTimer.stop();
+        progressTimer.reset();
+        setIsRoundActive(false);
+        updateFinances({ won: true });
+        gameService.reset();
+    }
+
+    function handleMuteToggle() {
+        setSoundMute(!soundMute);
+    }
+
     function updateStats(value: number) {
+        if (value === 0) return;
         const copyOfStats = { ...gameStats };
         if (value < 0) {
             copyOfStats.losses++;
@@ -100,20 +127,27 @@ function App() {
         setGameStats(copyOfStats);
     }
 
+    function progressTimerFinishedHandler() {
+        setGameOver(true);
+        explosionSound.play(soundMute);
+        updateFinances({ won: false });
+        progressTimer.stop();
+        gameService.reset();
+        setCurrentMultiplier(gameService.currentMultiplier);
+    }
+
     return (
         <Grid container className="container"
             component={"main"}
             sx={{ height: "100vh", display: "flex", flexDirection: "column" }}>
             {/* header */}
-            <AppBar position="static">
-                <Toolbar component={"section"} variant="dense" sx={{ justifyContent: "center" }}>
-                    <Typography variant="h1">
-                        Mines
-                    </Typography>
-                </Toolbar>
-            </AppBar>
+            <Box component={"header"} display={"flex"} justifyContent={"center"} margin={2}>
+                <Typography variant="h1" fontSize={theme.typography.h2.fontSize}>
+                    Mines
+                </Typography>
+            </Box>
             {/* main section */}
-            <Grid container item component={"section"} sx={{ flexGrow: 1, padding: 4 }}>
+            <Grid container item component={"section"} sx={{ flexGrow: 1, paddingLeft: 2, paddingRight: 2, paddingBottom: 2 }}>
                 {/* sidebar (game configuration) */}
                 <Grid item className="leftRounded" component={"aside"} xs={4} sx={{ backgroundColor: theme.palette.primary.dark, padding: 2 }}>
                     <GameSideBar gridSize={{
@@ -121,29 +155,35 @@ function App() {
                         minGridSize: 5,
                         maxGridSize: 10,
                         changedHandler: gridSizeChangedHandler
-                    }} capital={{
-                        value: capital,
-                        changeHandler: capitalChangeHandler
-                    }} mineAmount={{
+                    }} capital={{ value: capital }} mineAmount={{
                         value: validMineAmount,
                         changedHandler: mineAmountChangedHandler
-                    }} bet={{
-                        value: bet,
-                        changeHandler: betChangeHandler,
-                        placeBetHandler: placeBetHandler
-                    }} />
+                    }} betProps={{ placeBetHandler: placeBetHandler }}
+                        diamondsLeft={diamondAmount}
+                        isPlaying={isRoundActive}
+                        cashOutHandler={cashOutHandler} />
                 </Grid>
                 {/* Game*/}
                 <Grid item className="rightRounded" component={"section"} xs={8}
                     sx={{ backgroundColor: theme.palette.primary.dark, display: "flex", justifyContent: "center", alignItems: "center", flexDirection: "column" }}>
                     <Box component={"header"} sx={{ width: "100%", padding: 2 }}>
-                        <LinearProgress variant="determinate" color="secondary" value={progress} sx={{ height: "10px" }} />
+                        <LinearProgress variant="determinate" color="secondary" value={progress} sx={{
+                            height: "10px",
+                            "& .MuiLinearProgress-bar": {
+                                transition: "transform .1s linear"
+                            }
+                        }} />
                     </Box>
-                    <Typography variant="h4">Current Multiplier: {currentMultiplier}</Typography>
+                    <Box component={"header"} sx={{ display: "flex", justifyContent: "space-between", width: "100%", paddingLeft: 2, paddingRight: 2 }}>
+                        <Typography variant="h4">Multiplier: {currentMultiplier}</Typography>
+                        <IconButton onClick={handleMuteToggle} aria-label="toggle sound">
+                            {soundMute ? <VolumeOff /> : <VolumeUp />}
+                        </IconButton>
+                    </Box>
                     <GameField cellClickHandler={cellClickHandler} gameEndHandler={gameEndHandler} gridSize={gridSize} cells={cells} isActive={isRoundActive} />
                 </Grid>
             </Grid>
-        </Grid>
+        </Grid >
     )
 }
 

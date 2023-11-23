@@ -1,3 +1,3 @@
 import { atom } from "jotai";
 
-export const betAtom = atom(0);
+export const betAtom = atom(10);

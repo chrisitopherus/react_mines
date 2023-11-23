@@ -1,3 +1,3 @@
 import { atom } from "jotai";
 
-export const capitalAtom = atom(0);
+export const capitalAtom = atom(10_000);

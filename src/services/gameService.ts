@@ -2,30 +2,32 @@ import { MultiplierService } from "./multiplierService";
 
 export class GameService {
     private multiplierService;
-    private foundDiamonds: number = 0;
+    private diamondAmount: number = 0;
+    public foundDiamonds: number = 0;
 
-    constructor(private cells: number, private minesAmount: number) {
+    constructor(cells: number, minesAmount: number) {
         this.multiplierService = new MultiplierService(cells, minesAmount);
+        this.diamondAmount = cells - minesAmount;
     }
 
     changeData(cells: number, minesAmount: number) {
-        this.cells = cells;
-        this.minesAmount = minesAmount;
         this.multiplierService.updateData(cells, minesAmount);
     }
 
     get currentMultiplier() {
-        console.log("currentMultiplier:", "diamonds:", this.foundDiamonds);
         return this.multiplierService.calculateMultiplier(this.foundDiamonds);
     }
 
     foundDiamond() {
-        if (this.foundDiamonds === this.totalDiamonds) throw new Error("Exceeded the maximum amount of possible diamonds.");
+        if (this.foundDiamonds === this.diamondAmount) throw new Error("Exceeded the maximum amount of possible diamonds.");
         this.foundDiamonds++;
-        console.log(this.foundDiamonds);
     }
 
-    private get totalDiamonds() {
-        return this.cells - this.minesAmount;
+    reset() {
+        this.foundDiamonds = 0;
+    }
+
+    get diamondsLeft() {
+        return this.diamondAmount - this.foundDiamonds;
     }
 }

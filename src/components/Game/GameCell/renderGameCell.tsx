@@ -1,4 +1,4 @@
-import { Button, ButtonOwnProps, SxProps } from "@mui/material";
+import { Button, ButtonOwnProps, SxProps, Theme } from "@mui/material";
 import { GameCellProps } from "./GameCell";
 import { CellType } from "../../../types/cell";
 
@@ -18,7 +18,7 @@ const buttonStyles = {
     },
 }
 
-export function renderCell(props: GameCellProps) {
+export function renderCell(props: GameCellProps, theme: Theme) {
     let color: ButtonOwnProps["color"];
     if (props.isRevealed) {
         if (props.type === CellType.Mine) color = "error";
@@ -32,7 +32,8 @@ export function renderCell(props: GameCellProps) {
         additionalStyles = {
             "&.Mui-disabled": {
                 cursor: "not-allowed",
-                pointerEvents: "all"
+                pointerEvents: "all",
+                backgroundColor: color === "primary" ? "" : color === "success" ? theme.palette.success.dark : theme.palette.error.dark,
             }
         } satisfies SxProps;
     }

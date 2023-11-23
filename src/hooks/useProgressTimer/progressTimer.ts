@@ -1,11 +1,13 @@
 import { Dispatch, SetStateAction } from "react";
 
 export class ProgressTimer {
-    constructor(private setProgress: Dispatch<SetStateAction<number>>, private setIsRoundActive: Dispatch<SetStateAction<boolean>>) {
+    constructor(private setProgress: Dispatch<SetStateAction<number>>, private setIsRoundActive: Dispatch<SetStateAction<boolean>>, private finishedHandler: () => void) {
 
     }
+
     stop() {
         this.setIsRoundActive(false);
+        this.reset();
     }
 
     reset() {
@@ -13,7 +15,11 @@ export class ProgressTimer {
     }
 
     start() {
+        this.reset();
         this.setIsRoundActive(true);
-        this.setProgress(0);
+    }
+
+    finish() {
+        this.finishedHandler();
     }
 }

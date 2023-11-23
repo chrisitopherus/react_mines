@@ -1,4 +1,4 @@
-import { Grid } from "@mui/material";
+import { Grid, useTheme } from "@mui/material";
 import { CellType } from "../../../types/cell";
 import { MouseEventHandler } from "react";
 import { renderCell } from "./renderGameCell";
@@ -13,9 +13,10 @@ export interface GameCellProps {
 }
 
 export default function GameCell(props: GameCellProps) {
+    const theme = useTheme();
     return (
         <Grid item xs={12 / props.gridSize} sx={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
-            {renderCell(props)}
+            {renderCell(props, theme)}
         </Grid>
     )
 }

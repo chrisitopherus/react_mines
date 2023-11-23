@@ -1,10 +1,9 @@
-import { Box, Button, Container, FormControl, IconButton, InputAdornment, InputLabel, MenuItem, OutlinedInput, Select, Typography, useTheme } from "@mui/material";
-import { ChangeEventHandler, MouseEventHandler } from "react";
+import { Box, Button, Container, FormControl, FormHelperText, InputAdornment, InputLabel, MenuItem, OutlinedInput, Select, Typography, useTheme } from "@mui/material";
+import { ChangeEvent, MouseEventHandler, useEffect, useState } from "react";
 import { SelectChangeHandler } from "../../types/eventHandlers";
+import { GameStats } from "../GameStats/GameStats";
 import { useAtom } from "jotai";
-import { soundMuteAtom } from "../../atoms/soundMute.atom";
-import { VolumeOff, VolumeUp } from "@mui/icons-material";
-import { gameStatsAtom } from "../../atoms/gameStats.atom";
+import { betAtom } from "../../atoms/bet.atom";
 
 interface GameSideBarProps {
     gridSize: {
@@ -16,7 +15,6 @@ interface GameSideBarProps {
 
     capital: {
         value: number;
-        changeHandler: ChangeEventHandler<HTMLInputElement>;
     },
 
     mineAmount: {
@@ -24,11 +22,15 @@ interface GameSideBarProps {
         changedHandler: SelectChangeHandler
     },
 
-    bet: {
-        value: number;
-        changeHandler: ChangeEventHandler<HTMLInputElement>;
+    diamondsLeft: number;
+
+    betProps: {
         placeBetHandler: MouseEventHandler<HTMLButtonElement>;
-    }
+    },
+
+    isPlaying: boolean;
+
+    cashOutHandler: MouseEventHandler<HTMLButtonElement>;
 }
 
 function generateGridSizeSelectItems(min: number, max: number) {
@@ -49,47 +51,64 @@ function generateMinesAmountItems(max: number) {
     return items;
 }
 
-export default function GameSideBar({ gridSize, capital, mineAmount, bet }: GameSideBarProps) {
+export default function GameSideBar({ gridSize, capital, mineAmount, betProps, isPlaying, diamondsLeft, cashOutHandler }: GameSideBarProps) {
     const theme = useTheme();
-    const [soundMute, setSoundMute] = useAtom(soundMuteAtom);
-    const [gameStats, setGameStats] = useAtom(gameStatsAtom);
+    const [bet, setBet] = useAtom(betAtom);
+    const [betDisplayValue, setBetDisplayValue] = useState(bet.toString());
+    const [betError, setBetError] = useState(false);
 
-    function handleMuteToggle() {
-        setSoundMute(!soundMute);
+    function validateBet(event: ChangeEvent<HTMLInputElement>) {
+        const rawValue = event.target.value;
+        const betValue = +rawValue;
+        setBetDisplayValue(rawValue);
+        if (isNaN(betValue) || !Number.isInteger(betValue) || betValue < 0 || betValue > capital.value) {
+            setBetError(true);
+        } else {
+            setBetError(false);
+            setBet(betValue);
+        }
     }
+
+    useEffect(() => {
+        if (capital.value < bet) {
+            setBetError(true);
+        }
+    }, [capital.value, bet]);
 
     return (
         <Container className="leftRounded" component={"section"} sx={{ display: "flex", flexDirection: "column", backgroundColor: theme.palette.primary.main, height: "100%", padding: 2, justifyContent: "space-between" }}>
             <Box component={"section"} sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-                <FormControl fullWidth size="small">
-                    <InputLabel >Capital</InputLabel>
-                    <OutlinedInput
-                        onChange={capital.changeHandler}
-                        value={capital.value}
-                        inputProps={{
-                            step: "1"
-                        }}
-                        startAdornment={<InputAdornment position="start">€</InputAdornment>}
-                        label="Capital"
-                    />
-                </FormControl>
-                <FormControl fullWidth size="small">
-                    <InputLabel >Bet</InputLabel>
-                    <OutlinedInput
-                        onChange={bet.changeHandler}
-                        value={bet.value}
-                        inputProps={{
-                            step: "1"
-                        }}
-                        startAdornment={<InputAdornment position="start">€</InputAdornment>}
-                        label="Bet"
-                    />
-                </FormControl>
+                <Box component={"section"} display="flex" gap={1}>
+                    <FormControl disabled fullWidth size="small">
+                        <InputLabel >Capital</InputLabel>
+                        <OutlinedInput
+                            value={capital.value}
+                            inputProps={{
+                                step: "1"
+                            }}
+                            startAdornment={<InputAdornment position="start">€</InputAdornment>}
+                            label="Capital"
+                        />
+                    </FormControl>
+                    <FormControl disabled={isPlaying} fullWidth size="small">
+                        <InputLabel >Bet</InputLabel>
+                        <OutlinedInput
+                            onChange={validateBet}
+                            value={betDisplayValue}
+                            inputProps={{
+                                step: "1"
+                            }}
+                            startAdornment={<InputAdornment position="start">€</InputAdornment>}
+                            label="Bet"
+                        />
+                        {betError && <FormHelperText>Invalid bet amount</FormHelperText>}
+                    </FormControl>
+                </Box>
                 <Box component={"section"} sx={{ display: "flex", flexDirection: "column" }}>
                     <Typography>
                         Grid size:
                     </Typography>
-                    <Select value={gridSize.currentGridSize} onChange={gridSize.changedHandler} size="small">
+                    <Select disabled={isPlaying} value={gridSize.currentGridSize} onChange={gridSize.changedHandler} size="small">
                         {generateGridSizeSelectItems(gridSize.minGridSize, gridSize.maxGridSize)}
                     </Select>
                 </Box>
@@ -97,20 +116,33 @@ export default function GameSideBar({ gridSize, capital, mineAmount, bet }: Game
                     <Typography>
                         Mines:
                     </Typography>
-                    <Select value={mineAmount.value} onChange={mineAmount.changedHandler} size="small">
+                    <Select disabled={isPlaying} value={mineAmount.value} onChange={mineAmount.changedHandler} size="small">
                         {generateMinesAmountItems(gridSize.currentGridSize ** 2 - 1)}
                     </Select>
                 </Box>
-                <Button variant="contained" color="secondary" onClick={bet.placeBetHandler}>Bet</Button>
+                <Button disabled={isPlaying || betError || capital.value <= 0} variant="contained" color="secondary" onClick={betProps.placeBetHandler}>Bet</Button>
+                <Button disabled={!isPlaying} variant="contained" color="secondary" onClick={cashOutHandler}>Cashout</Button>
+            </Box>
+            <Box component={"section"} display="flex" gap={1}>
+                <FormControl disabled fullWidth size="small">
+                    <InputLabel>Mines</InputLabel>
+                    <OutlinedInput
+                        value={mineAmount.value}
+                        startAdornment={<InputAdornment position="start">💣</InputAdornment>}
+                        label="Mines"
+                    />
+                </FormControl>
+                <FormControl disabled fullWidth size="small">
+                    <InputLabel>Gems</InputLabel>
+                    <OutlinedInput
+                        value={diamondsLeft} // Assuming this is where you're tracking gems
+                        startAdornment={<InputAdornment position="start">💎</InputAdornment>}
+                        label="Gems"
+                    />
+                </FormControl>
             </Box>
             <Box component={"section"}>
-                {gameStats.salesVolume}
-            </Box>
-            {/* here is the options sections -> mute toggle button, show stats toggle etc.*/}
-            <Box component={"footer"}>
-                <IconButton onClick={handleMuteToggle} aria-label="toggle sound">
-                    {soundMute ? <VolumeOff /> : <VolumeUp />}
-                </IconButton>
+                <GameStats />
             </Box>
         </Container>
     )
