@@ -8,8 +8,8 @@ import { factorial } from "./factorial";
  * @throws If either n or k is negative.
  */
 export const combination = (n: number, k: number) => {
-    if (n < 0 || k < 0) throw new Error('Invalid input');
+    if (n < 0 || k < 0) throw new Error("Invalid input");
     if (k > n) return 0;
     if (k === 0 || n === k) return 1;
     return factorial(n) / (factorial(k) * factorial(n - k));
-}
+};

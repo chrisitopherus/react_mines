@@ -36,7 +36,7 @@ interface GameSideBarProps {
 function generateGridSizeSelectItems(min: number, max: number) {
     const items: JSX.Element[] = [];
     for (let i = min; i < max + 1; i++) {
-        items.push(<MenuItem key={i} value={i}>{`${i}x${i}`}</MenuItem>)
+        items.push(<MenuItem key={i} value={i}>{`${i}x${i}`}</MenuItem>);
     }
 
     return items;
@@ -45,7 +45,7 @@ function generateGridSizeSelectItems(min: number, max: number) {
 function generateMinesAmountItems(max: number) {
     const items: JSX.Element[] = [];
     for (let i = 1; i < max + 1; i++) {
-        items.push(<MenuItem key={i} value={i}>{i}</MenuItem>)
+        items.push(<MenuItem key={i} value={i}>{i}</MenuItem>);
     }
 
     return items;
@@ -145,5 +145,5 @@ export default function GameSideBar({ gridSize, capital, mineAmount, betProps, i
                 <GameStats />
             </Box>
         </Container>
-    )
+    );
 }

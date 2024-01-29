@@ -77,5 +77,5 @@ export function useGameState() {
         cells, setCells,
         fieldController,
         gameService: gameServiceRef.current
-    }
+    };
 }

@@ -18,5 +18,5 @@ export default function GameCell(props: GameCellProps) {
         <Grid item xs={12 / props.gridSize} sx={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
             {renderCell(props, theme)}
         </Grid>
-    )
+    );
 }

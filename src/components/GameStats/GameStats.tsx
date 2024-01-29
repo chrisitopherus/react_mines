@@ -1,7 +1,6 @@
-import { Typography, Grid, useTheme, Box } from '@mui/material';
-import { useAtom } from 'jotai';
-import { gameStatsAtom } from '../../atoms/gameStats.atom';
-
+import { Typography, Grid, useTheme, Box } from "@mui/material";
+import { useAtom } from "jotai";
+import { gameStatsAtom } from "../../atoms/gameStats.atom";
 export function GameStats() {
     const theme = useTheme();
     const [gameStats] = useAtom(gameStatsAtom);

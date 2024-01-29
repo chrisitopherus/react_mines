@@ -12,4 +12,4 @@ export const factorial = (number: number) => {
     }
 
     return value;
-}
+};

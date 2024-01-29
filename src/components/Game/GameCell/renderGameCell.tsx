@@ -4,19 +4,19 @@ import { CellType } from "../../../types/cell";
 
 const buttonStyles = {
     display: "flex",
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     width: "100%",
     height: "100%",
     padding: 0,
     margin: 0,
     overflow: "hidden",
-    transition: 'transform 0.3s',
-    '&:hover': {
-        transform: 'scale(1.05)',
+    transition: "transform 0.3s",
+    "&:hover": {
+        transform: "scale(1.05)",
         opacity: 0.9
     },
-}
+};
 
 export function renderCell(props: GameCellProps, theme: Theme) {
     let color: ButtonOwnProps["color"];

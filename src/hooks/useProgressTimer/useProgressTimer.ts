@@ -1,5 +1,5 @@
-import { useState, useEffect, Dispatch, SetStateAction, useMemo } from 'react';
-import { ProgressTimer } from './progressTimer';
+import { useState, useEffect, Dispatch, SetStateAction, useMemo } from "react";
+import { ProgressTimer } from "./progressTimer";
 
 export function useProgressTimer(isRoundActive: boolean, setIsRoundActive: Dispatch<SetStateAction<boolean>>, onCompletion: () => void, options: { seconds: number, frequency: number }) {
     const [progress, setProgress] = useState(0);
@@ -30,7 +30,6 @@ export function useProgressTimer(isRoundActive: boolean, setIsRoundActive: Dispa
         }
 
         return () => clearInterval(timer);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isRoundActive]);
 
     return { progressTimer, progress, setProgress };

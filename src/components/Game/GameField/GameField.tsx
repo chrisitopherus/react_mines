@@ -14,7 +14,7 @@ function generateCells(gridSize: number, cells: CellInformation[], isActive: boo
     const end = gridSize ** 2;
     const cellElements: JSX.Element[] = [];
     for (let i = 0; i < end; i++) {
-        cellElements.push(<GameCell clickHandler={clickHandler} isRevealed={cells[i].isRevealed} isActive={isActive} type={cells[i].type} key={i} index={i} gridSize={gridSize} />)
+        cellElements.push(<GameCell clickHandler={clickHandler} isRevealed={cells[i].isRevealed} isActive={isActive} type={cells[i].type} key={i} index={i} gridSize={gridSize} />);
     }
 
     return cellElements;
@@ -62,5 +62,5 @@ export default function GameField({ gridSize, cells, isActive, cellClickHandler 
                     />
                 </Backdrop>}
         </Grid>
-    )
+    );
 }

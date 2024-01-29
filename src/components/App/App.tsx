@@ -1,8 +1,8 @@
 import { useState } from "react";
-import './App.css'
-import { Box, Grid, IconButton, LinearProgress, SelectChangeEvent, Typography, useTheme } from '@mui/material';
-import { useAtom } from 'jotai';
-import GameSideBar from '../Game-SideBar/Game-SideBar';
+import "./App.css";
+import { Box, Grid, IconButton, LinearProgress, SelectChangeEvent, Typography, useTheme } from "@mui/material";
+import { useAtom } from "jotai";
+import GameSideBar from "../Game-SideBar/Game-SideBar";
 import GameField from "../Game/GameField/GameField";
 import { CellInformation, CellType } from "../../types/cell";
 import { useSound } from "../../hooks/useSound/useSound";
@@ -166,9 +166,9 @@ function App() {
                         value: validMineAmount,
                         changedHandler: mineAmountChangedHandler
                     }} betProps={{ placeBetHandler: placeBetHandler }}
-                        diamondsLeft={diamondAmount}
-                        isPlaying={isRoundActive}
-                        cashOutHandler={cashOutHandler} />
+                    diamondsLeft={diamondAmount}
+                    isPlaying={isRoundActive}
+                    cashOutHandler={cashOutHandler} />
                 </Grid>
                 {/* Game*/}
                 <Grid item className="rightRounded" component={"section"} xs={8}
@@ -191,7 +191,7 @@ function App() {
                 </Grid>
             </Grid>
         </Grid >
-    )
+    );
 }
 
-export default App
+export default App;
