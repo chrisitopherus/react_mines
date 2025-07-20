@@ -1,30 +1,40 @@
-# React + TypeScript + Vite
+# React Mines
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+This repository contains a small web implementation of the **Mines** game built with [React](https://react.dev/) and [TypeScript](https://www.typescriptlang.org/). It was created during my *Computer Science studies* as my first major React project. The gameplay was inspired by the "Mines" gambling game on stake.com.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- Adjustable grid size and number of mines
+- Place bets and cash out
+- Progress bar with a timer per round
+- Statistics for profits, losses and total profit
+- Sound effects using Howler
+- Lottie-based animations for winning and losing
+- State managed with Jotai and UI built with Material UI
+- Dockerfile for containerized builds
 
-## Expanding the ESLint configuration
+## Getting Started
 
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
+1. Install dependencies:
 
-- Configure the top-level `parserOptions` property like this:
+   ```bash
+   npm install
+   ```
 
-```js
-export default {
-  // other rules...
-  parserOptions: {
-    ecmaVersion: 'latest',
-    sourceType: 'module',
-    project: ['./tsconfig.json', './tsconfig.node.json'],
-    tsconfigRootDir: __dirname,
-  },
-}
-```
+2. Start the development server:
 
-- Replace `plugin:@typescript-eslint/recommended` to `plugin:@typescript-eslint/recommended-type-checked` or `plugin:@typescript-eslint/strict-type-checked`
-- Optionally add `plugin:@typescript-eslint/stylistic-type-checked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and add `plugin:react/recommended` & `plugin:react/jsx-runtime` to the `extends` list
+   ```bash
+   npm run dev
+   ```
+
+3. Build for production:
+
+   ```bash
+   npm run build
+   ```
+
+A `Dockerfile` is provided to generate a container image that serves the production build using the `serve` package.
+
+## Motivation
+
+I built this project as part of my computer science studies to familiarize myself with React and its ecosystem. Recreating the gameplay of stake.com's Mines offered a fun challenge in state management, animations and UI design. While simple, it was an excellent introduction to React development and working with TypeScript, Jotai and Material UI.
